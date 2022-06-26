@@ -151,13 +151,13 @@ const promptUpdateEmployee = async () => {
         
         inquirer.prompt([
                 {
-                    type: 'list',
+                    type: 'rawlist',
                     message: "Select an employee to update?",
                     name: 'id',
                     choices: employeeChoices
                 },
                 {
-                    type: 'list',
+                    type: 'rawlist',
                     message: "Select a new role?",
                     name: 'role_id',
                     choices: roleChoices,
@@ -165,7 +165,7 @@ const promptUpdateEmployee = async () => {
                     default: (answers) => roleChoices.findIndex(r => r.value == employees[employees.findIndex(e => e.id == answers.id)].role_id)
                 },
                 {
-                    type: 'list',
+                    type: 'rawlist',
                     message: "Select a new manager?",
                     name: 'manager_id',
                     choices: managerChoices,
@@ -201,7 +201,7 @@ const promptDeleteEmployee = async () => {
         
         inquirer.prompt([
                 {
-                    type: 'list',
+                    type: 'rawlist',
                     message: "Select an employee to delete?",
                     name: 'id',
                     choices: employeeChoices

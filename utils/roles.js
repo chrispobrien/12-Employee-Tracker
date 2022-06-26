@@ -59,7 +59,7 @@ const promptAddRole = async () => {
                     }
                 },
                 {
-                    type: 'list',
+                    type: 'rawlist',
                     message: "What department does the role belong to?",
                     name: 'department_id',
                     choices: departments
@@ -93,7 +93,7 @@ const promptDeleteRole = async () => {
         
         inquirer.prompt([
                 {
-                    type: 'list',
+                    type: 'rawlist',
                     message: "Select a role to delete?",
                     name: 'id',
                     choices: roleChoices

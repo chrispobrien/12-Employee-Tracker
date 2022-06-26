@@ -86,7 +86,7 @@ const promptDeleteDepartment = async () => {
         
         inquirer.prompt([
                 {
-                    type: 'list',
+                    type: 'rawlist',
                     message: "Select a department to delete?",
                     name: 'id',
                     choices: departmentChoices
