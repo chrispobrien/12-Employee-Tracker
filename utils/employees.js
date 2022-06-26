@@ -20,7 +20,7 @@ const viewAllEmployees = async () => {
 // Return all employees sorted by manager last name, first name
 const viewAllEmployeesByManager = async () => {
     const sql = `   SELECT IF(IFNULL(e.manager_id,'')='','',CONCAT(m.first_name,' ',m.last_name)) AS manager,
-                        e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary
+                        e.id, e.first_name, e.last_name, IFNULL(r.title,'') AS title, IFNULL(d.name,'') AS department, IFNULL(r.salary,0)
                     FROM employees e
                     LEFT JOIN roles r ON e.role_id=r.id
                     LEFT JOIN departments d ON r.department_id = d.id
@@ -151,13 +151,13 @@ const promptUpdateEmployee = async () => {
         
         inquirer.prompt([
                 {
-                    type: 'rawlist',
+                    type: 'list',
                     message: "Select an employee to update?",
                     name: 'id',
                     choices: employeeChoices
                 },
                 {
-                    type: 'rawlist',
+                    type: 'list',
                     message: "Select a new role?",
                     name: 'role_id',
                     choices: roleChoices,
@@ -165,7 +165,7 @@ const promptUpdateEmployee = async () => {
                     default: (answers) => roleChoices.findIndex(r => r.value == employees[employees.findIndex(e => e.id == answers.id)].role_id)
                 },
                 {
-                    type: 'rawlist',
+                    type: 'list',
                     message: "Select a new manager?",
                     name: 'manager_id',
                     choices: managerChoices,
