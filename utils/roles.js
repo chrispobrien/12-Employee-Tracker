@@ -3,7 +3,7 @@ const pool = require('../db/connection');
 
 // Return all roles
 const viewAllRoles = async () => {
-    const sql = `   SELECT r.id, r.title, d.name, r.salary FROM roles r
+    const sql = `   SELECT r.id, r.title, IFNULL(d.name,'') AS department, r.salary FROM roles r
                     LEFT JOIN departments d ON r.department_id = d.id`;
 
     const conn = await pool.getConnection();
@@ -82,6 +82,7 @@ const deleteRole = async (answers) => {
     return returnVal;
 };
 
+// Prompt for id of role to delete, using role title as choice
 const promptDeleteRole = async () => {
     // Loading roles to populate list choices [name, value] where name is displayed, value is stored
     const conn = await pool.getConnection();

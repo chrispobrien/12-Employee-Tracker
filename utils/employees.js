@@ -1,10 +1,11 @@
+// Modules
 const inquirer = require('inquirer');
 const pool = require('../db/connection');
 
-// Return all employees, joining roles, departments, and employees again for the manager
+// Return all employees, joining roles, departments, and employees again for the manager name
 const viewAllEmployees = async () => {
     const sql = `   SELECT e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary,
-                        IF(e.manager_id=null,null,CONCAT(m.first_name,' ',m.last_name)) AS manager FROM employees e
+                        IF(IFNULL(e.manager_id,'')='','',CONCAT(m.first_name,' ',m.last_name)) AS manager FROM employees e
                     LEFT JOIN roles r ON e.role_id=r.id
                     LEFT JOIN departments d ON r.department_id = d.id
                     LEFT JOIN employees m ON e.manager_id = m.id`;
@@ -16,6 +17,7 @@ const viewAllEmployees = async () => {
     return rows;
 };
 
+// Return all employees sorted by manager last name, first name
 const viewAllEmployeesByManager = async () => {
     const sql = `   SELECT IF(IFNULL(e.manager_id,'')='','',CONCAT(m.first_name,' ',m.last_name)) AS manager,
                         e.id, e.first_name, e.last_name, r.title, d.name AS department, r.salary
@@ -32,9 +34,10 @@ const viewAllEmployeesByManager = async () => {
     return rows;
 };
 
+// Return all employees sorted by department name
 const viewAllEmployeesByDepartment = async () => {
     const sql = `   SELECT d.name AS department, e.id, e.first_name, e.last_name, r.title, r.salary,
-                        IF(e.manager_id=null,null,CONCAT(m.first_name,' ',m.last_name)) AS manager FROM employees e
+                        IF(IFNULL(e.manager_id,'')='','',CONCAT(m.first_name,' ',m.last_name)) AS manager FROM employees e
                     LEFT JOIN roles r ON e.role_id=r.id
                     LEFT JOIN departments d ON r.department_id = d.id
                     LEFT JOIN employees m ON e.manager_id = m.id
@@ -116,7 +119,7 @@ const promptAddEmployee = async () => {
     })
 };
 
-// Update existing employee role_id
+// Update existing employee role_id and manager_id
 const updateEmployee = async (answers) => {
     const sql = 'UPDATE employees SET role_id = ?, manager_id = ? WHERE id = ?';
     const params = [answers.role_id, answers.manager_id, answers.id];
@@ -128,13 +131,17 @@ const updateEmployee = async (answers) => {
 };
 
 
-// prompt to update employee role
+// prompt to update employee role and manager
 const promptUpdateEmployee = async () => {
 
     // Loading roles and employees to populate list choices [name, value] where name is displayed, value is stored
     const conn = await pool.getConnection();
+    // First element is null, so user can choose no role UNION combines results from two or more SELECT statements
     const [ roleChoices, roleFields ] = await conn.query(`SELECT '(none)' AS name, null AS value UNION SELECT title AS name, id AS value FROM roles`);
-    const [ employeeChoices, employeeFields ] = await conn.query(`SELECT '(none)' AS name, null AS value UNION SELECT CONCAT(first_name,' ',last_name) AS name, id AS value FROM employees`);
+    // First element is null, so user can choose no manager UNION combines results from two or more SELECT statements
+    const [ managerChoices, employeeFields ] = await conn.query(`SELECT '(none)' AS name, null AS value UNION SELECT CONCAT(first_name,' ',last_name) AS name, id AS value FROM employees`);
+    // Employees but no null choice
+    const [ employeeChoices, employeeChoicesFields ] = await conn.query(`SELECT CONCAT(first_name,' ',last_name) AS name, id AS value FROM employees`);
     const [ employees, otherFields ] = await conn.query(`SELECT id, role_id, manager_id FROM employees`);
     conn.release();
 
@@ -154,14 +161,16 @@ const promptUpdateEmployee = async () => {
                     message: "Select a new role?",
                     name: 'role_id',
                     choices: roleChoices,
+                    // Sets default to existing value, so user can press Enter if no change
                     default: (answers) => roleChoices.findIndex(r => r.value == employees[employees.findIndex(e => e.id == answers.id)].role_id)
                 },
                 {
                     type: 'list',
                     message: "Select a new manager?",
                     name: 'manager_id',
-                    choices: employeeChoices,
-                    default: (answers) => employeeChoices.findIndex(e => e.value == employees[employees.findIndex(e => e.id == answers.id)].manager_id)
+                    choices: managerChoices,
+                    // Sets default to existing value, so user can press Enter if no change
+                    default: (answers) => managerChoices.findIndex(e => e.value == employees[employees.findIndex(e => e.id == answers.id)].manager_id)
                 }
             ])
             .then(answers => {
@@ -181,6 +190,7 @@ const deleteEmployee = async (answers) => {
     return returnVal;
 };
 
+// Prompt for id of employee to delete, but show name
 const promptDeleteEmployee = async () => {
     // Loading roles and employees to populate list choices [name, value] where name is displayed, value is stored
     const conn = await pool.getConnection();

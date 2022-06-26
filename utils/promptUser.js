@@ -1,5 +1,3 @@
-// Using mysql2/promise, so using a pool instead of the db, so we can await
-const pool = require('../db/connection');
 // Console prompt module
 const inquirer = require('inquirer');
 // A different way of logging tables to console (console.table)

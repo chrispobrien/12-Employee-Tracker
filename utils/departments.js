@@ -1,3 +1,4 @@
+// Modules
 const inquirer = require('inquirer');
 const pool = require('../db/connection');
 
@@ -14,8 +15,9 @@ const viewAllDepartments = async() => {
     return rows;
 };
 
+// Returns all departments and sum of salaries for that department - note null is blank department name
 const viewBudget = async() => {
-    const sql = `   SELECT IFNULL(d.name,'') AS department, SUM(r.salary) AS Total_Salary FROM employees e
+    const sql = `   SELECT IFNULL(d.name,'') AS department, SUM(IFNULL(r.salary,0)) AS Total_Salary FROM employees e
                     LEFT JOIN roles r ON e.role_id = r.id
                     LEFT JOIN departments d ON r.department_id = d.id
                     GROUP BY IFNULL(d.name,'')`
@@ -73,6 +75,7 @@ const deleteDepartment = async (answers) => {
     return returnVal;
 };
 
+// Prompt for id of department to delete
 const promptDeleteDepartment = async () => {
     // Loading roles to populate list choices [name, value] where name is displayed, value is stored
     const conn = await pool.getConnection();

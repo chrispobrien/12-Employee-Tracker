@@ -15,7 +15,7 @@ INSERT INTO roles (title, salary, department_id) VALUES
     ('Lawyer',190000,4);
 
 INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES
-    ('John','Due',1,null),
+    ('John','Doe',1,null),
     ('Mike','Chan',2,1),
     ('Ashley','Rodriguez',3,null),
     ('Kevin','Tupik',4,3),
