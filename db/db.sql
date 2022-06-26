@@ -1,0 +1,5 @@
+DROP DATABASE IF EXISTS erp;
+
+CREATE DATABASE erp;
+
+USE erp;
